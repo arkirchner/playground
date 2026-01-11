@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Glass Circle SVG</title>
+
+    <style>
+    svg {
+      width: 100vw;
+      height: 100vh;
+      display: block;
+    }
+
+    .glass-green {
+      fill: url(#green-glass);
+    }
+
+    .glass-red {
+      fill: url(#red-glass);
+    }
+    </style>
+  </head>
+  <body>
+    <svg viewBox="0 0 100 100">
+      <defs>
+        <!-- Green glass -->
+        <radialGradient id="green-glass" cx="30%" cy="30%" r="70%">
+          <stop offset="0%" stop-color="#b9ffcf" />
+          <stop offset="40%" stop-color="#3ddc84" />
+          <stop offset="100%" stop-color="#0f7a43" />
+        </radialGradient>
+
+        <!-- Red glass -->
+        <radialGradient id="red-glass" cx="30%" cy="30%" r="70%">
+          <stop offset="0%" stop-color="#ffc1c1" />
+          <stop offset="40%" stop-color="#ff4d4d" />
+          <stop offset="100%" stop-color="#8a1212" />
+        </radialGradient>
+      </defs>
+
+      <!-- Main glass circle -->
+      <circle
+        id="circle"
+        class="glass-green"
+        cx="50"
+        cy="50"
+        r="30"
+      />
+    </svg>
+
+    <svg viewBox="0 0 100 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- Green glass -->
+        <radialGradient id="green-glass" cx="30%" cy="30%" r="70%">
+          <stop offset="0%" stop-color="#b9ffcf" />
+          <stop offset="40%" stop-color="#3ddc84" />
+          <stop offset="100%" stop-color="#0f7a43" />
+        </radialGradient>
+
+        <!-- Red glass -->
+        <radialGradient id="red-glass" cx="30%" cy="30%" r="70%">
+          <stop offset="0%" stop-color="#ffc1c1" />
+          <stop offset="40%" stop-color="#ff4d4d" />
+          <stop offset="100%" stop-color="#8a1212" />
+        </radialGradient>
+      </defs>
+
+      <g id="binary-cell-candy">
+        <g id="lever">
+          <path id="lever-base" d="M13.5519 118.334C13.199 117.861 13.33 117.187 13.8343 116.881L19.2164 113.613C19.9584 113.162 20.8827 113.806 20.717 114.659L19.1009 122.973C18.9352 123.825 17.837 124.076 17.3178 123.38L13.5519 118.334Z" fill="black"/>
+          <line id="lever-stick" x1="15.5771" y1="118.316" x2="5.71322" y2="111.41" stroke="black"/>
+        </g>
+        <circle id="globe" cx="50" cy="47" r="45" class="glass-green"/>
+        <path id="body" d="M75 84L98.9948 198.25H2L24.9974 84H75Z" fill="#FF00EE"/>
+        <path id="chute" d="M50 145C71.7481 145 89.5338 166.636 83.9703 186.325C70.1031 200.559 31.3679 200.559 16.0297 186.325C10.4662 166.636 28.2519 145 50 145Z" fill="#6B1919"/>
+        <path id="output-candy" d="M65 140C65 148.284 58.2843 155 50 155C41.7157 155 35 148.284 35 140C35 131.716 41.7157 125 50 125C58.2843 125 65 131.716 65 140Z" fill="#37FF00" class="glass-green"/>
+        <g id="select-candy">
+          <path id="select-dial" d="M67 139.5C67 149.165 59.165 157 49.5 157C39.835 157 32 149.165 32 139.5C32 129.835 39.835 122 49.5 122C59.165 122 67 129.835 67 139.5Z" fill="#0099FF"/>
+          <path id="select-handle" d="M33.9168 123.083C33.3865 123.614 32.8562 124.144 32.3258 124.674C32.7874 125.313 33.2535 125.947 33.7239 126.576C37.958 132.242 42.55 137.55 47.5 142.5C52.45 147.45 57.758 152.042 63.4239 156.276C64.0535 156.747 64.6874 157.213 65.3258 157.674C65.8562 157.144 66.3865 156.614 66.9168 156.083C66.4552 155.445 65.9892 154.811 65.5187 154.181C61.2847 148.515 56.6926 143.207 51.7426 138.257C46.7926 133.307 41.4847 128.715 35.8187 124.481C35.1892 124.011 34.5552 123.545 33.9168 123.083Z" fill="black"/>
+        </g>
+        <path id="input-candy" d="M65 104C65 112.284 58.2843 119 50 119C41.7157 119 35 112.284 35 104C35 95.7157 41.7157 89 50 89C58.2843 89 65 95.7157 65 104Z" class="glass-green"/>
+      </g>
+    </svg>
+
+    <script>
+    const inputCandy = document.getElementById("input-candy");
+
+    inputCandy.addEventListener("click", () => {
+      inputCandy.classList.toggle("glass-green");
+      inputCandy.classList.toggle("glass-red");
+    });
+    </script>
+  </body>
+</html>
