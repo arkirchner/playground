@@ -1,3 +1,15 @@
+
+
+
+
+
+
+
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -5,49 +17,67 @@
     <title>Glass Circle SVG</title>
 
     <style>
-    svg {
-      width: 100vw;
-      height: 100vh;
-      display: block;
-    }
+      svg {
+        width: 100vw;
+        height: 100vh;
+        display: block;
+      }
 
-    .glass-green {
-      fill: url(#green-glass);
-    }
+      .glass-green {
+        fill: url(#green-glass);
+      }
 
-    .glass-red {
-      fill: url(#red-glass);
-    }
+      .glass-red {
+        fill: url(#red-glass);
+      }
+
+      .rotating {
+        transform-origin: 50% 50%;
+        transform-box: fill-box;
+        animation: rotate 2s linear;
+      }
+
+      .lever-on {
+        transform-origin: 100% 100%;
+        transform-box: fill-box;
+        animation: lever-on .5s linear;
+      }
+
+      .lever-off {
+        transform-origin: 100% 100%;
+        transform-box: fill-box;
+        animation: lever-off .5s linear;
+      }
+
+      @keyframes rotate {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @keyframes lever-on {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(-45deg);
+        }
+      }
+
+      @keyframe lever-off {
+        from {
+          transform: rotate(-45deg);
+        }
+        to {
+          transform: rotate(0deg);
+        }
+      }
     </style>
   </head>
   <body>
-    <svg viewBox="0 0 100 100">
-      <defs>
-        <!-- Green glass -->
-        <radialGradient id="green-glass" cx="30%" cy="30%" r="70%">
-          <stop offset="0%" stop-color="#b9ffcf" />
-          <stop offset="40%" stop-color="#3ddc84" />
-          <stop offset="100%" stop-color="#0f7a43" />
-        </radialGradient>
-
-        <!-- Red glass -->
-        <radialGradient id="red-glass" cx="30%" cy="30%" r="70%">
-          <stop offset="0%" stop-color="#ffc1c1" />
-          <stop offset="40%" stop-color="#ff4d4d" />
-          <stop offset="100%" stop-color="#8a1212" />
-        </radialGradient>
-      </defs>
-
-      <!-- Main glass circle -->
-      <circle
-        id="circle"
-        class="glass-green"
-        cx="50"
-        cy="50"
-        r="30"
-      />
-    </svg>
-
     <svg viewBox="0 0 100 200" fill="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <!-- Green glass -->
@@ -83,12 +113,21 @@
     </svg>
 
     <script>
-    const inputCandy = document.getElementById("input-candy");
+      const inputCandy = document.getElementById("input-candy");
+      const selectCandy = document.getElementById("select-candy");
 
-    inputCandy.addEventListener("click", () => {
-      inputCandy.classList.toggle("glass-green");
-      inputCandy.classList.toggle("glass-red");
-    });
+      inputCandy.addEventListener("click", () => {
+        inputCandy.classList.toggle("glass-green");
+        inputCandy.classList.toggle("glass-red");
+      });
+
+      selectCandy.addEventListener("click", () => {
+        selectCandy.classList.remove("rotating");
+
+        setTimeout(function(){
+          selectCandy.classList.add("rotating");
+        }, 10);
+      });
     </script>
   </body>
 </html>
