@@ -1,15 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -40,13 +28,19 @@
       .lever-on {
         transform-origin: 100% 100%;
         transform-box: fill-box;
-        animation: lever-on .5s linear;
+        animation: lever-switch .5s ease forwards reverse;
       }
 
       .lever-off {
         transform-origin: 100% 100%;
         transform-box: fill-box;
-        animation: lever-off .5s linear;
+        animation: lever-switch .5s ease forwards;
+      }
+
+      .ball-drop {
+        transform-box: fill-box;
+        transform-origin: center bottom;
+        animation: drop-bounce 1.2s linear forwards;
       }
 
       @keyframes rotate {
@@ -58,7 +52,7 @@
         }
       }
 
-      @keyframes lever-on {
+      @keyframes lever-switch {
         from {
           transform: rotate(0deg);
         }
@@ -67,12 +61,29 @@
         }
       }
 
-      @keyframe lever-off {
-        from {
-          transform: rotate(-45deg);
+      @keyframes drop-bounce {
+        0% {
+          transform: translateY(-120px) scale(1);
         }
-        to {
-          transform: rotate(0deg);
+
+        60% {
+          transform: translateY(0) scale(1.15, 0.85);
+        }
+
+        75% {
+          transform: translateY(-30px) scale(0.95, 1.05);
+        }
+
+        85% {
+          transform: translateY(0) scale(1.1, 0.9);
+        }
+
+        92% {
+          transform: translateY(-10px) scale(0.98, 1.02);
+        }
+
+        100% {
+          transform: translateY(0) scale(1);
         }
       }
     </style>
@@ -113,12 +124,29 @@
     </svg>
 
     <script>
+      const state = {
+        inputMode: true,
+        state: true,
+        inputState: true,
+      };
+
       const inputCandy = document.getElementById("input-candy");
       const selectCandy = document.getElementById("select-candy");
+      const lever = document.getElementById("lever");
+      const leverStick = document.getElementById("lever-stick");
+      const globe = document.getElementById("globe");
+      const outputCandy = document.getElementById("output-candy");
 
       inputCandy.addEventListener("click", () => {
-        inputCandy.classList.toggle("glass-green");
-        inputCandy.classList.toggle("glass-red");
+        if (state.inputState) {
+          inputCandy.classList.remove("glass-green");
+          inputCandy.classList.add("glass-red");
+          state.inputState = false;
+        } else {
+          inputCandy.classList.remove("glass-red");
+          inputCandy.classList.add("glass-green");
+          state.inputState = true;
+        }
       });
 
       selectCandy.addEventListener("click", () => {
@@ -127,7 +155,41 @@
         setTimeout(function(){
           selectCandy.classList.add("rotating");
         }, 10);
+
+        if (state.inputMode === true) {
+          if (state.inputState) {
+            globe.classList.remove("glass-red");
+            globe.classList.add("glass-green");
+          } else {
+            globe.classList.remove("glass-green");
+            globe.classList.add("glass-red");
+          }
+          state.state = state.inputState; 
+        } else {
+          outputCandy.classList.remove("ball-drop");
+          outputCandy.classList.remove("glass-green");
+          outputCandy.classList.remove("glass-red");
+
+          setTimeout(function(){
+            color = state.state ? "glass-green" : "glass-red";
+
+            outputCandy.classList.add("ball-drop", color);
+          }, 10);
+        }
       });
+
+      lever.addEventListener("click", () => {
+        console.log(state.inputMode)
+        if (state.inputMode === true) {
+          leverStick.classList.remove("lever-on");
+          leverStick.classList.add("lever-off");
+          state.inputMode = false;
+        } else {
+          leverStick.classList.remove("lever-off");
+          leverStick.classList.add("lever-on");
+          state.inputMode = true;
+        }
+      })
     </script>
   </body>
 </html>
