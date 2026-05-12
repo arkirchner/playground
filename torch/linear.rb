@@ -2,7 +2,8 @@ require "torch"
 
 # Training data
 x_train = Torch.tensor([[1.0], [2.0], [3.0], [4.0]])
-y_train = Torch.tensor([[3.0], [5.0], [7.0], [9.0]])
+# y_train = Torch.tensor([[3.0], [5.0], [7.0], [9.0]])
+y_train = Torch.tensor([[3.1], [4.9], [7.2], [8.8]])
 
 # Simple neural network
 model = Torch::NN::Linear.new(1, 1)
