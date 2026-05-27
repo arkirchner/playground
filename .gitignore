@@ -1,6 +1,6 @@
-# Local .terraform directories
 kvm_cluster/.terraform/
-
-# .tfstate files
 kvm_cluster/*.tfstate
 kvm_cluster/*.tfstate.*
+kvm_cluster/.terraform.lock.hcl
+kvm_cluster/crash.log
+kvm_cluster/.talos/

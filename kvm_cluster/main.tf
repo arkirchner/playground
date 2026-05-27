@@ -27,6 +27,7 @@ data "talos_machine_configuration" "controlplane" {
     yamlencode({
       machine = {
         install = {
+          disk  = "/dev/vda"
           image = local.installer_image
         }
       }
@@ -49,6 +50,7 @@ data "talos_machine_configuration" "worker" {
     yamlencode({
       machine = {
         install = {
+          disk  = "/dev/vda"
           image = local.installer_image
         }
       }
@@ -61,6 +63,8 @@ data "talos_machine_configuration" "worker" {
 # Apply control plane configurations
 resource "talos_machine_configuration_apply" "controlplane" {
   count = var.controlplane_count
+
+  depends_on = [libvirt_domain.controlplane]
 
   client_configuration        = talos_machine_secrets.this.client_configuration
   machine_configuration_input = data.talos_machine_configuration.controlplane.machine_configuration
@@ -81,7 +85,7 @@ resource "talos_machine_configuration_apply" "controlplane" {
 resource "talos_machine_configuration_apply" "worker" {
   count = var.worker_count
 
-  depends_on = [talos_machine_bootstrap.this]
+  depends_on = [talos_machine_bootstrap.this, libvirt_domain.worker]
 
   client_configuration        = talos_machine_secrets.this.client_configuration
   machine_configuration_input = data.talos_machine_configuration.worker.machine_configuration

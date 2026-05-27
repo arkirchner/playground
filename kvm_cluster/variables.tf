@@ -43,7 +43,7 @@ variable "worker_ips" {
 variable "cluster_vip" {
   description = "Virtual IP for the cluster endpoint"
   type        = string
-  default     = "10.0.0.1"
+  default     = "10.0.0.100"
 }
 
 variable "schematic_id" {
@@ -51,3 +51,34 @@ variable "schematic_id" {
   type        = string
   default     = ""
 }
+
+variable "disk_size" {
+  description = "Disk size per node in bytes"
+  type        = number
+  default     = 21474836480
+}
+
+variable "controlplane_memory" {
+  description = "Control plane RAM in MB"
+  type        = number
+  default     = 4096
+}
+
+variable "controlplane_vcpu" {
+  description = "Control plane vCPUs"
+  type        = number
+  default     = 2
+}
+
+variable "worker_memory" {
+  description = "Worker RAM in MB"
+  type        = number
+  default     = 4096
+}
+
+variable "worker_vcpu" {
+  description = "Worker vCPUs"
+  type        = number
+  default     = 2
+}
+
