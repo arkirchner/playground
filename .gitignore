@@ -1,0 +1,6 @@
+# Local .terraform directories
+kvm_cluster/.terraform/
+
+# .tfstate files
+kvm_cluster/*.tfstate
+kvm_cluster/*.tfstate.*
