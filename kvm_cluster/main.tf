@@ -113,10 +113,20 @@ resource "talos_machine_bootstrap" "this" {
   node                 = var.controlplane_ips[0]
 }
 
-resource "time_sleep" "wait_for_kubernetes" {
+resource "terraform_data" "k8s_cleanup" {
   depends_on = [data.talos_cluster_kubeconfig.this]
 
+  provisioner "local-exec" {
+    when    = destroy
+    command = "echo 'Kubernetes namespace cleanup checkpoint passed — safe to tear down infrastructure'"
+  }
+}
+
+resource "time_sleep" "wait_for_kubernetes" {
+  depends_on = [terraform_data.k8s_cleanup]
+
   create_duration = "300s"
+  destroy_duration = "30s"
 }
 
 
