@@ -12,7 +12,7 @@ locals {
   ) : (
     "ghcr.io/siderolabs/installer:${var.talos_version}"
   )
-  cluster_endpoint = "https://${var.cluster_vip}:6443"
+  cluster_endpoint = "https://${var.controlplane_ips[0]}:6443"
 }
 
 # Control plane configuration
@@ -112,6 +112,13 @@ resource "talos_machine_bootstrap" "this" {
   client_configuration = talos_machine_secrets.this.client_configuration
   node                 = var.controlplane_ips[0]
 }
+
+resource "time_sleep" "wait_for_kubernetes" {
+  depends_on = [data.talos_cluster_kubeconfig.this]
+
+  create_duration = "300s"
+}
+
 
 # Step 5: Get kubeconfig
 data "talos_cluster_kubeconfig" "this" {
