@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Export kubeconfig
+tofu output -raw kubeconfig > ~/.kube/config
+chmod 600 ~/.kube/config
+
+# Export talosconfig
+tofu output -raw talosconfig > ~/.talos/config
+chmod 600 ~/.talos/config
+
+# Verify
+kubectl get nodes
+talosctl health --nodes 10.0.0.10
