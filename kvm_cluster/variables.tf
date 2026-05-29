@@ -7,13 +7,13 @@ variable "cluster_name" {
 variable "talos_version" {
   description = "Talos Linux version"
   type        = string
-  default     = "v1.7.0"
+  default     = "v1.13.3"
 }
 
 variable "kubernetes_version" {
   description = "Kubernetes version"
   type        = string
-  default     = "v1.30.0"
+  default     = "v1.36.1"
 }
 
 variable "controlplane_count" {
@@ -47,9 +47,15 @@ variable "cluster_vip" {
 }
 
 variable "schematic_id" {
-  description = "Image Factory schematic ID"
+  description = "Image Factory schematic ID (leave empty to auto-generate from extensions list)"
   type        = string
   default     = ""
+}
+
+variable "extensions" {
+  description = "List of Talos system extension names to include in the image"
+  type        = list(string)
+  default     = ["iscsi-tools", "util-linux-tools"]
 }
 
 variable "disk_size" {

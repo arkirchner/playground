@@ -1,7 +1,7 @@
 # outputs.tf
 output "kubeconfig" {
   description = "Kubernetes configuration for cluster access"
-  value       = data.talos_cluster_kubeconfig.this.kubeconfig_raw
+  value       = talos_cluster_kubeconfig.this.kubeconfig_raw
   sensitive   = true
 }
 

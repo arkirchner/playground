@@ -4,4 +4,5 @@ kvm_cluster/*.tfstate.*
 kvm_cluster/.terraform.lock.hcl
 kvm_cluster/crash.log
 kvm_cluster/.talos/
+kvm_cluster/.talos_image/
 kvm_cluster/.libvirt-pool/

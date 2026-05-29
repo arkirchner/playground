@@ -1,8 +1,8 @@
 locals {
-  talos_image_url    = "https://github.com/siderolabs/talos/releases/download/${var.talos_version}/metal-amd64.raw.xz"
-  talos_image_xz     = abspath("${path.module}/.talos/metal-amd64.raw.xz")
-  talos_image_raw    = abspath("${path.module}/.talos/metal-amd64.raw")
-  talos_image_dir    = abspath("${path.module}/.talos")
+  talos_image_url = "https://github.com/siderolabs/talos/releases/download/${var.talos_version}/metal-amd64.raw.zst"
+  talos_image_zst = abspath("${path.module}/.talos_image/metal-amd64.raw.zst")
+  talos_image_raw = abspath("${path.module}/.talos_image/metal-amd64.raw")
+  talos_image_dir = abspath("${path.module}/.talos_image")
 }
 
 resource "terraform_data" "talos_image" {
@@ -10,17 +10,16 @@ resource "terraform_data" "talos_image" {
 
   provisioner "local-exec" {
     command = <<-EOT
+      rm -rf "${local.talos_image_dir}"
       mkdir -p "${local.talos_image_dir}"
-      if [ ! -f "${local.talos_image_raw}" ]; then
-        curl -L -o "${local.talos_image_xz}" "${local.talos_image_url}"
-        xz -dk "${local.talos_image_xz}"
-      fi
+      curl -L -o "${local.talos_image_zst}" "${local.talos_image_url}"
+      zstd -dk "${local.talos_image_zst}"
     EOT
   }
 
   provisioner "local-exec" {
     when    = destroy
-    command = "rm -rf ${abspath("${path.module}/.talos")}"
+    command = "rm -rf ${path.module}/.talos_image"
   }
 }
 
@@ -48,7 +47,7 @@ resource "libvirt_network" "talos" {
 
 resource "libvirt_volume" "talos_base" {
   name   = "${var.cluster_name}-talos-base"
-pool = libvirt_pool.talos.name
+  pool   = libvirt_pool.talos.name
   source = local.talos_image_raw
 
   depends_on = [terraform_data.talos_image]
