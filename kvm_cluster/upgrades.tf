@@ -29,8 +29,7 @@ EOF
 # Upgrade control plane nodes sequentially
 resource "terraform_data" "upgrade_controlplane" {
   triggers_replace = [
-    var.talos_version,
-    var.schematic_id
+    var.talos_version
   ]
 
   depends_on = [
@@ -58,8 +57,7 @@ resource "terraform_data" "upgrade_controlplane" {
 # Upgrade worker nodes sequentially (after control planes)
 resource "terraform_data" "upgrade_workers" {
   triggers_replace = [
-    var.talos_version,
-    var.schematic_id
+    var.talos_version
   ]
 
   depends_on = [

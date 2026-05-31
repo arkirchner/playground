@@ -46,18 +46,6 @@ variable "cluster_vip" {
   default     = "10.0.0.100"
 }
 
-variable "schematic_id" {
-  description = "Image Factory schematic ID (leave empty to auto-generate from extensions list)"
-  type        = string
-  default     = ""
-}
-
-variable "extensions" {
-  description = "List of Talos system extension names to include in the image"
-  type        = list(string)
-  default     = ["iscsi-tools", "util-linux-tools"]
-}
-
 variable "disk_size" {
   description = "Disk size per node in bytes"
   type        = number

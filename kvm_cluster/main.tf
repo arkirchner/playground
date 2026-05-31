@@ -9,7 +9,7 @@ resource "talos_machine_secrets" "this" {
 data "talos_image_factory_extensions_versions" "this" {
   talos_version = var.talos_version
   filters = {
-    names = var.extensions
+    names = ["iscsi-tools", "util-linux-tools"]
   }
 }
 
@@ -25,7 +25,7 @@ resource "talos_image_factory_schematic" "this" {
 
 # Determine the installer image
 locals {
-  schematic_id     = var.schematic_id != "" ? var.schematic_id : talos_image_factory_schematic.this.id
+  schematic_id     = talos_image_factory_schematic.this.id
   installer_image  = "factory.talos.dev/installer/${local.schematic_id}:${var.talos_version}"
   cluster_endpoint = "https://${var.controlplane_ips[0]}:6443"
 }
