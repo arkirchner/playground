@@ -4,7 +4,7 @@ terraform {
   required_providers {
     talos = {
       source  = "siderolabs/talos"
-      version = ">= 0.5.0"
+      version = ">= 0.11.0"
     }
     libvirt = {
       source  = "dmacvicar/libvirt"
