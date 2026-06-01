@@ -33,6 +33,14 @@ data "talos_machine_configuration" "controlplane" {
     yamlencode({
       cluster = {
         allowSchedulingOnControlPlanes = var.worker_count == 0
+        network = {
+          cni = {
+            name = "none"
+          }
+        }
+        proxy = {
+          disabled = true
+        }
       }
     })
   ]
