@@ -38,16 +38,27 @@ resource "helm_release" "cilium" {
   }
 
   set {
-    name = "gatewayAPI.enabled"
+    name  = "gatewayAPI.enabled"
     value = "true"
   }
   set {
-    name = "gatewayAPI.enableAlpn"
+    name  = "gatewayAPI.enableAlpn"
     value = "true"
   }
 
   set {
-    name = "gatewayAPI.enableAppProtocol"
+    name  = "gatewayAPI.enableAppProtocol"
     value = "true"
+  }
+
+  # Allow envy to bing port 80 and 443 for external traffic.
+  set {
+    name  = "envoy.securityContext.capabilities.keepNetBindService"
+    value = "true"
+  }
+
+  set_list {
+    name  = "envoy.securityContext.capabilities.envoy"
+    value = ["NET_ADMIN", "SYS_ADMIN", "NET_BIND_SERVICE"]
   }
 }
