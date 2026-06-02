@@ -36,4 +36,18 @@ resource "helm_release" "cilium" {
     name  = "cgroup.hostRoot"
     value = "/sys/fs/cgroup"
   }
+
+  set {
+    name = "gatewayAPI.enabled"
+    value = "true"
+  }
+  set {
+    name = "gatewayAPI.enableAlpn"
+    value = "true"
+  }
+
+  set {
+    name = "gatewayAPI.enableAppProtocol"
+    value = "true"
+  }
 }
