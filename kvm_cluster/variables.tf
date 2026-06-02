@@ -55,7 +55,7 @@ variable "disk_size" {
 variable "controlplane_memory" {
   description = "Control plane RAM in MB"
   type        = number
-  default     = 4096
+  default     = 2048
 }
 
 variable "controlplane_vcpu" {
@@ -67,7 +67,7 @@ variable "controlplane_vcpu" {
 variable "worker_memory" {
   description = "Worker RAM in MB"
   type        = number
-  default     = 4096
+  default     = 2048
 }
 
 variable "worker_vcpu" {
@@ -75,4 +75,3 @@ variable "worker_vcpu" {
   type        = number
   default     = 2
 }
-
