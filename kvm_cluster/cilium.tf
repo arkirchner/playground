@@ -4,7 +4,7 @@ resource "helm_release" "cilium" {
   name       = "cilium"
   repository = "https://helm.cilium.io/"
   chart      = "cilium"
-  version    = "1.18.0"
+  version    = "1.19.4"
   namespace  = "kube-system"
 
   set {
@@ -14,7 +14,7 @@ resource "helm_release" "cilium" {
 
   set {
     name  = "kubeProxyReplacement"
-    value = "false"
+    value = "true"
   }
 
   set {
@@ -51,7 +51,7 @@ resource "helm_release" "cilium" {
     value = "true"
   }
 
-  # Allow envy to bing port 80 and 443 for external traffic.
+  # Allow envy to bing privileged port 80 and 443 for external traffic.
   set {
     name  = "envoy.securityContext.capabilities.keepNetBindService"
     value = "true"
@@ -60,5 +60,32 @@ resource "helm_release" "cilium" {
   set_list {
     name  = "envoy.securityContext.capabilities.envoy"
     value = ["NET_ADMIN", "SYS_ADMIN", "NET_BIND_SERVICE"]
+  }
+
+  # Expose port 80 and 443 on worker nodes
+
+  set {
+    name = "ingressController.enabled"
+    value = "true"
+  }
+
+  set {
+    name = "ingressController.default"
+    value = "true"
+  }
+
+  set {
+    name = "ingressController.hostNetwork.enabled"
+    value = "true"
+  }
+
+  set {
+    name = "ingressController.loadbalancerMode"
+    value = "shared"
+  }
+
+  set {
+    name = "ingressController.service.type"
+    value = "ClusterIP"
   }
 }
