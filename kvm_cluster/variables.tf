@@ -19,25 +19,25 @@ variable "kubernetes_version" {
 variable "controlplane_count" {
   description = "Number of control plane nodes"
   type        = number
-  default     = 3
+  default     = 1
 }
 
 variable "worker_count" {
   description = "Number of worker nodes"
   type        = number
-  default     = 3
+  default     = 2
 }
 
 variable "controlplane_ips" {
   description = "IP addresses for control plane nodes"
   type        = list(string)
-  default     = ["10.0.0.10", "10.0.0.11", "10.0.0.12"]
+  default     = ["10.0.0.10"]
 }
 
 variable "worker_ips" {
   description = "IP addresses for worker nodes"
   type        = list(string)
-  default     = ["10.0.0.20", "10.0.0.21", "10.0.0.22"]
+  default     = ["10.0.0.20", "10.0.0.21"]
 }
 
 variable "cluster_vip" {

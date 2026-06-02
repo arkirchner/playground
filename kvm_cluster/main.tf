@@ -38,9 +38,6 @@ data "talos_machine_configuration" "controlplane" {
             name = "none"
           }
         }
-        proxy = {
-          disabled = true
-        }
       }
     })
   ]
