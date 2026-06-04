@@ -53,7 +53,7 @@ resource "helm_release" "cilium" {
 
   # Allow envy to bing privileged port 80 and 443 for external traffic.
   set {
-    name  = "envoy.securityContext.capabilities.keepNetBindService"
+    name  = "envoy.securityContext.capabilities.keepCapNetBindService"
     value = "true"
   }
 
@@ -65,27 +65,32 @@ resource "helm_release" "cilium" {
   # Expose port 80 and 443 on worker nodes
 
   set {
-    name = "ingressController.enabled"
+    name  = "ingressController.enabled"
     value = "true"
   }
 
   set {
-    name = "ingressController.default"
+    name  = "ingressController.default"
     value = "true"
   }
 
   set {
-    name = "ingressController.hostNetwork.enabled"
+    name  = "ingressController.hostNetwork.enabled"
     value = "true"
   }
 
   set {
-    name = "ingressController.loadbalancerMode"
+    name  = "ingressController.hostNetwork.sharedListenerPort"
+    value = "80"
+  }
+
+  set {
+    name  = "ingressController.loadbalancerMode"
     value = "shared"
   }
 
   set {
-    name = "ingressController.service.type"
+    name  = "ingressController.service.type"
     value = "ClusterIP"
   }
 }

@@ -51,6 +51,20 @@ data "talos_machine_configuration" "worker" {
   kubernetes_version = var.kubernetes_version
 
   config_patches = [
+    yamlencode({
+      apiVersion = "v1alpha1"
+      kind       = "NetworkRuleConfig"
+      name       = "allow-ingress-http"
+      portSelector = {
+        ports    = [80, 443]
+        protocol = "tcp"
+      }
+      ingress = [
+        {
+          subnet = "0.0.0.0/0"
+        }
+      ]
+    })
   ]
 }
 
