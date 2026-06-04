@@ -7,6 +7,8 @@ resource "helm_release" "cilium" {
   version    = "1.19.4"
   namespace  = "kube-system"
 
+  # default configuration form Talos docs
+
   set {
     name  = "ipam.mode"
     value = "kubernetes"
@@ -38,6 +40,16 @@ resource "helm_release" "cilium" {
   }
 
   set {
+    name  = "k8sServiceHost"
+    value = "localhost"
+  }
+
+  set {
+    name  = "k8sServicePort"
+    value = "7445"
+  }
+
+  set {
     name  = "gatewayAPI.enabled"
     value = "true"
   }
@@ -52,45 +64,51 @@ resource "helm_release" "cilium" {
   }
 
   # Allow envy to bing privileged port 80 and 443 for external traffic.
-  set {
-    name  = "envoy.securityContext.capabilities.keepCapNetBindService"
-    value = "true"
-  }
 
-  set_list {
-    name  = "envoy.securityContext.capabilities.envoy"
-    value = ["NET_ADMIN", "SYS_ADMIN", "NET_BIND_SERVICE"]
-  }
+  # set {
+  #   name  = "envoy.securityContext.capabilities.keepCapNetBindService"
+  #   value = "true"
+  # }
+
+  # set_list {
+  #   name  = "envoy.securityContext.capabilities.envoy"
+  #   value = ["NET_ADMIN", "SYS_ADMIN", "NET_BIND_SERVICE"]
+  # }
 
   # Expose port 80 and 443 on worker nodes
 
-  set {
-    name  = "ingressController.enabled"
-    value = "true"
-  }
+  # set {
+  #   name  = "ingressController.enabled"
+  #   value = "true"
+  # }
 
-  set {
-    name  = "ingressController.default"
-    value = "true"
-  }
+  # set {
+  #   name  = "ingressController.default"
+  #   value = "true"
+  # }
 
-  set {
-    name  = "ingressController.hostNetwork.enabled"
-    value = "true"
-  }
+  # set {
+  #   name  = "ingressController.hostNetwork.enabled"
+  #   value = "true"
+  # }
 
-  set {
-    name  = "ingressController.hostNetwork.sharedListenerPort"
-    value = "80"
-  }
+  # set {
+  #   name  = "ingressController.hostNetwork.httpPort"
+  #   value = "80"
+  # }
 
-  set {
-    name  = "ingressController.loadbalancerMode"
-    value = "shared"
-  }
+  # set {
+  #   name  = "ingressController.hostNetwork.httpsPort"
+  #   value = "443"
+  # }
 
-  set {
-    name  = "ingressController.service.type"
-    value = "ClusterIP"
-  }
+  # set {
+  #   name  = "ingressController.loadbalancerMode"
+  #   value = "shared"
+  # }
+
+  # set {
+  #   name  = "ingressController.service.type"
+  #   value = "ClusterIP"
+  # }
 }

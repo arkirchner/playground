@@ -38,19 +38,11 @@ data "talos_machine_configuration" "controlplane" {
             name = "none"
           }
         }
+        proxy = {
+          disabled = true
+        }
       }
-    })
-  ]
-}
-
-data "talos_machine_configuration" "worker" {
-  cluster_name       = var.cluster_name
-  machine_type       = "worker"
-  cluster_endpoint   = local.cluster_endpoint
-  machine_secrets    = talos_machine_secrets.this.machine_secrets
-  kubernetes_version = var.kubernetes_version
-
-  config_patches = [
+    }),
     yamlencode({
       apiVersion = "v1alpha1"
       kind       = "NetworkRuleConfig"
@@ -66,6 +58,16 @@ data "talos_machine_configuration" "worker" {
       ]
     })
   ]
+}
+
+data "talos_machine_configuration" "worker" {
+  cluster_name       = var.cluster_name
+  machine_type       = "worker"
+  cluster_endpoint   = local.cluster_endpoint
+  machine_secrets    = talos_machine_secrets.this.machine_secrets
+  kubernetes_version = var.kubernetes_version
+
+  config_patches = []
 }
 
 
