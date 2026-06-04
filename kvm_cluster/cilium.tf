@@ -21,7 +21,7 @@ resource "helm_release" "cilium" {
 
   set {
     name  = "securityContext.capabilities.ciliumAgent"
-    value = "{CHOWN,KILL,NET_ADMIN,NET_RAW,IPC_LOCK,SYS_ADMIN,SYS_RESOURCE,DAC_OVERRIDE,FOWNER,SETGID,SETUID}"
+    value = "{CHOWN,KILL,NET_ADMIN,NET_RAW,NET_BIND_SERVICE,IPC_LOCK,SYS_ADMIN,SYS_RESOURCE,DAC_OVERRIDE,FOWNER,SETGID,SETUID}"
   }
 
   set {
@@ -63,43 +63,45 @@ resource "helm_release" "cilium" {
     value = "true"
   }
 
+  # Expose port 80 and 443 on worker nodes
+
+  set {
+    name  = "ingressController.enabled"
+    value = "true"
+  }
+
+  set {
+    name  = "ingressController.default"
+    value = "true"
+  }
+
+  set {
+    name  = "ingressController.hostNetwork.enabled"
+    value = "true"
+  }
+
+  set {
+    name  = "ingressController.hostNetwork.httpPort"
+    value = "80"
+  }
+
+  set {
+    name  = "ingressController.hostNetwork.httpsPort"
+    value = "443"
+  }
+
+  set {
+    name  = "envoy.securityContext.capabilities.keepCapNetBindService"
+    value = "true"
+  }
+
   # Allow envy to bing privileged port 80 and 443 for external traffic.
 
-  # set {
-  #   name  = "envoy.securityContext.capabilities.keepCapNetBindService"
-  #   value = "true"
   # }
 
   # set_list {
   #   name  = "envoy.securityContext.capabilities.envoy"
   #   value = ["NET_ADMIN", "SYS_ADMIN", "NET_BIND_SERVICE"]
-  # }
-
-  # Expose port 80 and 443 on worker nodes
-
-  # set {
-  #   name  = "ingressController.enabled"
-  #   value = "true"
-  # }
-
-  # set {
-  #   name  = "ingressController.default"
-  #   value = "true"
-  # }
-
-  # set {
-  #   name  = "ingressController.hostNetwork.enabled"
-  #   value = "true"
-  # }
-
-  # set {
-  #   name  = "ingressController.hostNetwork.httpPort"
-  #   value = "80"
-  # }
-
-  # set {
-  #   name  = "ingressController.hostNetwork.httpsPort"
-  #   value = "443"
   # }
 
   # set {
