@@ -1,10 +1,43 @@
-resource "helm_release" "cilium" {
+locals {
+  version = "1.19.4"
+  # Cilium 1.19.x supports GatewayAPI v1.4.1 (Cilium 1.50.x will need v1.5.1)
+  gateway_api_crd_version = "v1.4.1"
+  gateway_api_crds = toset([
+    "gatewayclasses",
+    "gateways",
+    "httproutes",
+    "referencegrants",
+    "grpcroutes"
+  ])
+}
+
+data "http" "gateway_api_crd" {
+  for_each = local.gateway_api_crds
+  url      = "https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/${local.gateway_api_crd_version}/config/crd/standard/gateway.networking.k8s.io_${each.value}.yaml"
+}
+
+data "http" "experimental_gateway_tlsroutes_crd" {
+  url      = "https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/${local.gateway_api_crd_version}/config/crd/experimental/gateway.networking.k8s.io_tlsroutes.yaml"
+}
+
+resource "kubectl_manifest" "gateway_api_crd" {
   depends_on = [data.talos_cluster_health.this]
+  for_each   = local.gateway_api_crds
+  yaml_body  = data.http.gateway_api_crd[each.value].response_body
+}
+
+resource "kubectl_manifest" "experimental_gateway_tlsroutes_crd" {
+  depends_on = [data.talos_cluster_health.this]
+  yaml_body  = data.http.experimental_gateway_tlsroutes_crd.response_body
+}
+
+resource "helm_release" "cilium" {
+  depends_on = [kubectl_manifest.gateway_api_crd, kubectl_manifest.experimental_gateway_tlsroutes_crd]
 
   name       = "cilium"
   repository = "https://helm.cilium.io/"
   chart      = "cilium"
-  version    = "1.19.4"
+  version    = local.version
   namespace  = "kube-system"
 
   # default configuration form Talos docs
@@ -62,55 +95,4 @@ resource "helm_release" "cilium" {
     name  = "gatewayAPI.enableAppProtocol"
     value = "true"
   }
-
-  # Expose port 80 and 443 on worker nodes
-
-  set {
-    name  = "ingressController.enabled"
-    value = "true"
-  }
-
-  set {
-    name  = "ingressController.default"
-    value = "true"
-  }
-
-  set {
-    name  = "ingressController.hostNetwork.enabled"
-    value = "true"
-  }
-
-  set {
-    name  = "ingressController.hostNetwork.httpPort"
-    value = "80"
-  }
-
-  set {
-    name  = "ingressController.hostNetwork.httpsPort"
-    value = "443"
-  }
-
-  set {
-    name  = "envoy.securityContext.capabilities.keepCapNetBindService"
-    value = "true"
-  }
-
-  # Allow envy to bing privileged port 80 and 443 for external traffic.
-
-  # }
-
-  # set_list {
-  #   name  = "envoy.securityContext.capabilities.envoy"
-  #   value = ["NET_ADMIN", "SYS_ADMIN", "NET_BIND_SERVICE"]
-  # }
-
-  # set {
-  #   name  = "ingressController.loadbalancerMode"
-  #   value = "shared"
-  # }
-
-  # set {
-  #   name  = "ingressController.service.type"
-  #   value = "ClusterIP"
-  # }
 }
