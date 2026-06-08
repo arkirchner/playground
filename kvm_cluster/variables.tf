@@ -75,3 +75,9 @@ variable "worker_vcpu" {
   type        = number
   default     = 2
 }
+
+variable "certificate_dns_names" {
+  description = "DNS names for the TLS certificate"
+  type        = list(string)
+  default     = ["test.marceldempers.dev"]
+}

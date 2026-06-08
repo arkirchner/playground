@@ -117,8 +117,86 @@ resource "helm_release" "cilium" {
   }
 }
 
-resource "kubectl_manifest" "gateway" {
+resource "helm_release" "cert_manager" {
   depends_on = [helm_release.cilium]
+
+  name             = "cert-manager"
+  repository       = "oci://quay.io/jetstack/charts"
+  chart            = "cert-manager"
+  version          = "v1.20.2"
+  namespace        = "cert-manager"
+  create_namespace = true
+
+  set {
+    name  = "crds.enabled"
+    value = "true"
+  }
+
+  set {
+    name  = "config.enableGatewayAPI"
+    value = "true"
+  }
+}
+
+resource "kubectl_manifest" "cluster_issuer" {
+  depends_on = [helm_release.cert_manager]
+
+  yaml_body = yamlencode({
+    apiVersion = "cert-manager.io/v1"
+    kind       = "ClusterIssuer"
+    metadata = {
+      name = "letsencrypt-issuer"
+    }
+    spec = {
+      selfSigned = {} # For local testing
+      # acme = {
+      #   server = "https://acme-v02.api.letsencrypt.org/directory"
+      #   privateKeySecretRef = {
+      #     name = "letsencrypt-issuer-key"
+      #   }
+      #   solvers = [
+      #     {
+      #       http01 = {
+      #         gatewayHTTPRoute = {
+      #           parentRefs = [
+      #             {
+      #               name      = "cilium"
+      #               namespace = "kube-system"
+      #               kind      = "Gateway"
+      #             }
+      #           ]
+      #         }
+      #       }
+      #     }
+      #   ]
+      # }
+    }
+  })
+}
+
+resource "kubectl_manifest" "certificate" {
+  depends_on = [kubectl_manifest.cluster_issuer]
+
+  yaml_body = yamlencode({
+    apiVersion = "cert-manager.io/v1"
+    kind       = "Certificate"
+    metadata = {
+      name      = "dns-certificates"
+      namespace = "kube-system"
+    }
+    spec = {
+      dnsNames   = var.certificate_dns_names
+      secretName = "secret-dns-certificates"
+      issuerRef = {
+        name = "letsencrypt-issuer"
+        kind = "ClusterIssuer"
+      }
+    }
+  })
+}
+
+resource "kubectl_manifest" "gateway" {
+  depends_on = [kubectl_manifest.certificate]
 
   yaml_body = yamlencode({
     apiVersion = "gateway.networking.k8s.io/v1"
@@ -134,6 +212,25 @@ resource "kubectl_manifest" "gateway" {
           name     = "http"
           protocol = "HTTP"
           port     = 80
+          allowedRoutes = {
+            namespaces = {
+              from = "All"
+            }
+          }
+        },
+        {
+          name     = "https"
+          protocol = "HTTPS"
+          port     = 443
+          tls = {
+            mode   = "Terminate"
+            certificateRefs = [
+              {
+                name       = "secret-dns-certificates"
+                namespace  = "kube-system"
+              }
+            ]
+          }
           allowedRoutes = {
             namespaces = {
               from = "All"
