@@ -67,7 +67,47 @@ data "talos_machine_configuration" "worker" {
   machine_secrets    = talos_machine_secrets.this.machine_secrets
   kubernetes_version = var.kubernetes_version
 
-  config_patches = []
+  config_patches = [
+    yamlencode({
+      apiVersion = "v1alpha1"
+      kind       = "VolumeConfig"
+      name       = "EPHEMERAL"
+      provisioning = {
+        diskSelector = {
+          match = "system_disk"
+        }
+        minSize = var.ephemeral_disk_size
+        maxSize = var.ephemeral_disk_size
+        grow    = false
+      }
+    }),
+    yamlencode({
+      apiVersion = "v1alpha1"
+      kind       = "UserVolumeConfig"
+      name       = "persistent-storage"
+      provisioning = {
+        diskSelector = {
+          match = "system_disk"
+        }
+        minSize = "1GB"
+        grow    = true
+      }
+    }),
+    yamlencode({
+      machine = {
+        kubelet = {
+          extraMounts = [
+            {
+              destination = "/var/mnt/persistent-storage"
+              type        = "bind"
+              source      = "/var/mnt/persistent-storage"
+              options     = ["bind", "rshared", "rw"]
+            }
+          ]
+        }
+      }
+    })
+  ]
 }
 
 

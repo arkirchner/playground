@@ -79,5 +79,17 @@ variable "worker_vcpu" {
 variable "certificate_dns_names" {
   description = "DNS names for the TLS certificate"
   type        = list(string)
-  default     = ["test.marceldempers.dev"]
+  default     = ["longhorn.test.local", ]
+}
+
+variable "longhorn_host" {
+  description = "Hostname for the Longhorn UI"
+  type        = string
+  default     = "longhorn.test.local"
+}
+
+variable "ephemeral_disk_size" {
+  description = "Size of the EPHEMERAL volume on worker system disks"
+  type        = string
+  default     = "5GB"
 }
