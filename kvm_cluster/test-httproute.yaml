@@ -1,0 +1,55 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httproute-test
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: httproute-test
+  template:
+    metadata:
+      labels:
+        app: httproute-test
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: httproute-test-svc
+  namespace: default
+spec:
+  selector:
+    app: httproute-test
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  type: ClusterIP
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: httproute-test-route
+  namespace: default
+spec:
+  parentRefs:
+  - name: cilium
+    namespace: kube-system
+  hostnames:
+  - "httproute-test.example.local"
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: httproute-test-svc
+      port: 80

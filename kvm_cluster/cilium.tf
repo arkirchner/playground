@@ -95,4 +95,52 @@ resource "helm_release" "cilium" {
     name  = "gatewayAPI.enableAppProtocol"
     value = "true"
   }
+
+  set {
+    name  = "gatewayAPI.hostNetwork.enabled"
+    value = "true"
+  }
+
+  set {
+    name  = "envoy.enabled"
+    value = "true"
+  }
+
+  set {
+    name  = "envoy.securityContext.capabilities.keepCapNetBindService"
+    value = "true"
+  }
+
+  set {
+    name  = "envoy.securityContext.capabilities.envoy"
+    value = "{NET_ADMIN,SYS_ADMIN,NET_BIND_SERVICE}"
+  }
+}
+
+resource "kubectl_manifest" "gateway" {
+  depends_on = [helm_release.cilium]
+
+  yaml_body = yamlencode({
+    apiVersion = "gateway.networking.k8s.io/v1"
+    kind       = "Gateway"
+    metadata = {
+      name      = "cilium"
+      namespace = "kube-system"
+    }
+    spec = {
+      gatewayClassName = "cilium"
+      listeners = [
+        {
+          name     = "http"
+          protocol = "HTTP"
+          port     = 80
+          allowedRoutes = {
+            namespaces = {
+              from = "All"
+            }
+          }
+        }
+      ]
+    }
+  })
 }
