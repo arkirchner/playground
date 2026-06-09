@@ -1,12 +1,12 @@
 locals {
-  talos_image_url = "https://github.com/siderolabs/talos/releases/download/${var.talos_version}/metal-amd64.raw.zst"
+  talos_image_url = "https://factory.talos.dev/image/${local.schematic_id}/${var.talos_version}/metal-amd64.raw.zst"
   talos_image_zst = abspath("${path.module}/.talos_image/metal-amd64.raw.zst")
   talos_image_raw = abspath("${path.module}/.talos_image/metal-amd64.raw")
   talos_image_dir = abspath("${path.module}/.talos_image")
 }
 
 resource "terraform_data" "talos_image" {
-  triggers_replace = [var.talos_version]
+  triggers_replace = [var.talos_version, local.schematic_id]
 
   provisioner "local-exec" {
     command = <<-EOT

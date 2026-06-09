@@ -49,7 +49,7 @@ variable "cluster_vip" {
 variable "disk_size" {
   description = "Disk size per node in bytes"
   type        = number
-  default     = 21474836480
+  default     = 32212254720
 }
 
 variable "controlplane_memory" {
@@ -91,5 +91,5 @@ variable "longhorn_host" {
 variable "ephemeral_disk_size" {
   description = "Size of the EPHEMERAL volume on worker system disks"
   type        = string
-  default     = "5GB"
+  default     = "10GB"
 }
