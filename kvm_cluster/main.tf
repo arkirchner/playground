@@ -32,7 +32,7 @@ data "talos_machine_configuration" "controlplane" {
   config_patches = [
     yamlencode({
       cluster = {
-        allowSchedulingOnControlPlanes = var.worker_count == 0
+        allowSchedulingOnControlPlanes = length(var.worker_ips) == 0
         network = {
           cni = {
             name = "none"
@@ -112,7 +112,7 @@ data "talos_machine_configuration" "worker" {
 
 
 resource "talos_machine_configuration_apply" "controlplane" {
-  count = var.controlplane_count
+  count = length(var.controlplane_ips)
 
   depends_on = [libvirt_domain.controlplane]
 
@@ -122,7 +122,7 @@ resource "talos_machine_configuration_apply" "controlplane" {
 }
 
 resource "talos_machine_configuration_apply" "worker" {
-  count = var.worker_count
+  count = length(var.worker_ips)
 
   depends_on = [talos_machine_bootstrap.this, libvirt_domain.worker]
 

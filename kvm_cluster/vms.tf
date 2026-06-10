@@ -54,26 +54,26 @@ resource "libvirt_volume" "talos_base" {
 }
 
 resource "libvirt_volume" "controlplane" {
-  count          = var.controlplane_count
+  count          = length(var.controlplane_ips)
   name           = "${var.cluster_name}-cp-${count.index}.qcow2"
   pool           = libvirt_pool.talos.name
   base_volume_id = libvirt_volume.talos_base.id
-  size           = var.disk_size
+  size           = 32212254720
 }
 
 resource "libvirt_volume" "worker" {
-  count          = var.worker_count
+  count          = length(var.worker_ips)
   name           = "${var.cluster_name}-worker-${count.index}.qcow2"
   pool           = libvirt_pool.talos.name
   base_volume_id = libvirt_volume.talos_base.id
-  size           = var.disk_size
+  size           = 32212254720
 }
 
 resource "libvirt_domain" "controlplane" {
-  count     = var.controlplane_count
+  count     = length(var.controlplane_ips)
   name      = "${var.cluster_name}-cp-${count.index}"
-  memory    = var.controlplane_memory
-  vcpu      = var.controlplane_vcpu
+  memory    = 2048
+  vcpu      = 2
   autostart = true
 
   cpu {
@@ -107,10 +107,10 @@ resource "libvirt_domain" "controlplane" {
 }
 
 resource "libvirt_domain" "worker" {
-  count     = var.worker_count
+  count     = length(var.worker_ips)
   name      = "${var.cluster_name}-worker-${count.index}"
-  memory    = var.worker_memory
-  vcpu      = var.worker_vcpu
+  memory    = 2048
+  vcpu      = 2
   autostart = true
 
   cpu {

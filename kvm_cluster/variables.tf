@@ -16,18 +16,6 @@ variable "kubernetes_version" {
   default     = "v1.36.1"
 }
 
-variable "controlplane_count" {
-  description = "Number of control plane nodes"
-  type        = number
-  default     = 1
-}
-
-variable "worker_count" {
-  description = "Number of worker nodes"
-  type        = number
-  default     = 2
-}
-
 variable "controlplane_ips" {
   description = "IP addresses for control plane nodes"
   type        = list(string)
@@ -38,42 +26,6 @@ variable "worker_ips" {
   description = "IP addresses for worker nodes"
   type        = list(string)
   default     = ["10.0.0.20", "10.0.0.21"]
-}
-
-variable "cluster_vip" {
-  description = "Virtual IP for the cluster endpoint"
-  type        = string
-  default     = "10.0.0.100"
-}
-
-variable "disk_size" {
-  description = "Disk size per node in bytes"
-  type        = number
-  default     = 32212254720
-}
-
-variable "controlplane_memory" {
-  description = "Control plane RAM in MB"
-  type        = number
-  default     = 2048
-}
-
-variable "controlplane_vcpu" {
-  description = "Control plane vCPUs"
-  type        = number
-  default     = 2
-}
-
-variable "worker_memory" {
-  description = "Worker RAM in MB"
-  type        = number
-  default     = 2048
-}
-
-variable "worker_vcpu" {
-  description = "Worker vCPUs"
-  type        = number
-  default     = 2
 }
 
 variable "certificate_dns_names" {
