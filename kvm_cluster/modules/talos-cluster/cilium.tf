@@ -1,6 +1,5 @@
 locals {
   version = "1.19.4"
-  # Cilium 1.19.x supports GatewayAPI v1.4.1 (Cilium 1.50.x will need v1.5.1)
   gateway_api_crd_version = "v1.4.1"
   gateway_api_crds = toset([
     "gatewayclasses",
@@ -39,8 +38,6 @@ resource "helm_release" "cilium" {
   chart      = "cilium"
   version    = local.version
   namespace  = "kube-system"
-
-  # default configuration form Talos docs
 
   set {
     name  = "ipam.mode"
@@ -147,30 +144,7 @@ resource "kubectl_manifest" "cluster_issuer" {
     metadata = {
       name = "letsencrypt-issuer"
     }
-    spec = {
-      selfSigned = {} # For local testing
-      # acme = {
-      #   server = "https://acme-v02.api.letsencrypt.org/directory"
-      #   privateKeySecretRef = {
-      #     name = "letsencrypt-issuer-key"
-      #   }
-      #   solvers = [
-      #     {
-      #       http01 = {
-      #         gatewayHTTPRoute = {
-      #           parentRefs = [
-      #             {
-      #               name      = "cilium"
-      #               namespace = "kube-system"
-      #               kind      = "Gateway"
-      #             }
-      #           ]
-      #         }
-      #       }
-      #     }
-      #   ]
-      # }
-    }
+    spec = var.cluster_issuer_spec
   })
 }
 

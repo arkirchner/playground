@@ -19,25 +19,21 @@ variable "kubernetes_version" {
 variable "controlplane_ips" {
   description = "IP addresses for control plane nodes"
   type        = list(string)
-  default     = ["10.0.0.10"]
 }
 
 variable "worker_ips" {
   description = "IP addresses for worker nodes"
   type        = list(string)
-  default     = ["10.0.0.20", "10.0.0.21"]
 }
 
 variable "certificate_dns_names" {
   description = "DNS names for the TLS certificate"
   type        = list(string)
-  default     = ["longhorn.test.local", ]
 }
 
 variable "longhorn_host" {
   description = "Hostname for the Longhorn UI"
   type        = string
-  default     = "longhorn.test.local"
 }
 
 variable "ephemeral_disk_size" {

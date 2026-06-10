@@ -114,7 +114,7 @@ data "talos_machine_configuration" "worker" {
 resource "talos_machine_configuration_apply" "controlplane" {
   count = length(var.controlplane_ips)
 
-  depends_on = [libvirt_domain.controlplane]
+  depends_on = [var.node_dependency]
 
   client_configuration        = talos_machine_secrets.this.client_configuration
   machine_configuration_input = data.talos_machine_configuration.controlplane.machine_configuration
@@ -124,7 +124,7 @@ resource "talos_machine_configuration_apply" "controlplane" {
 resource "talos_machine_configuration_apply" "worker" {
   count = length(var.worker_ips)
 
-  depends_on = [talos_machine_bootstrap.this, libvirt_domain.worker]
+  depends_on = [talos_machine_bootstrap.this, var.node_dependency]
 
   client_configuration        = talos_machine_secrets.this.client_configuration
   machine_configuration_input = data.talos_machine_configuration.worker.machine_configuration
