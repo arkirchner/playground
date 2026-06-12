@@ -45,3 +45,16 @@ variable "ephemeral_disk_size" {
   type        = string
   default     = "10GB"
 }
+
+variable "admin_username" {
+  description = "Username for admin basic auth"
+  type        = string
+  default     = "admin"
+}
+
+variable "admin_password" {
+  description = "Password for admin basic auth (SHA1 base64 hash for htpasswd)"
+  type        = string
+  default     = "W6ph5Mm5Pz8GgiULbPgzG37mj9g="
+  sensitive   = true
+}

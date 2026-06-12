@@ -48,3 +48,14 @@ variable "cluster_issuer_spec" {
   description = "cert-manager ClusterIssuer spec (selfSigned for local, acme for production)"
   type        = any
 }
+
+variable "admin_username" {
+  description = "Username for admin basic auth"
+  type        = string
+}
+
+variable "admin_password" {
+  description = "Password for admin basic auth"
+  type        = string
+  sensitive   = true
+}
