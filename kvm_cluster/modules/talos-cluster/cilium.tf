@@ -1,12 +1,14 @@
 locals {
-  version = "1.19.4"
-  gateway_api_crd_version = "v1.4.1"
+  version = "1.20.0-pre.3"
+  gateway_api_crd_version = "v1.5.1"
   gateway_api_crds = toset([
     "gatewayclasses",
     "gateways",
     "httproutes",
     "referencegrants",
-    "grpcroutes"
+    "grpcroutes",
+    "backendtlspolicies",
+    "tlsroutes"
   ])
 }
 
@@ -15,23 +17,14 @@ data "http" "gateway_api_crd" {
   url      = "https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/${local.gateway_api_crd_version}/config/crd/standard/gateway.networking.k8s.io_${each.value}.yaml"
 }
 
-data "http" "experimental_gateway_tlsroutes_crd" {
-  url      = "https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/${local.gateway_api_crd_version}/config/crd/experimental/gateway.networking.k8s.io_tlsroutes.yaml"
-}
-
 resource "kubectl_manifest" "gateway_api_crd" {
   depends_on = [data.talos_cluster_health.this]
   for_each   = local.gateway_api_crds
   yaml_body  = data.http.gateway_api_crd[each.value].response_body
 }
 
-resource "kubectl_manifest" "experimental_gateway_tlsroutes_crd" {
-  depends_on = [data.talos_cluster_health.this]
-  yaml_body  = data.http.experimental_gateway_tlsroutes_crd.response_body
-}
-
 resource "helm_release" "cilium" {
-  depends_on = [kubectl_manifest.gateway_api_crd, kubectl_manifest.experimental_gateway_tlsroutes_crd]
+  depends_on = [kubectl_manifest.gateway_api_crd]
 
   name       = "cilium"
   repository = "https://helm.cilium.io/"
