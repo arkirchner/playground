@@ -14,13 +14,14 @@ locals {
 
 data "http" "gateway_api_crd" {
   for_each = local.gateway_api_crds
-  url      = "https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/${local.gateway_api_crd_version}/config/crd/standard/gateway.networking.k8s.io_${each.value}.yaml"
+  url      = "https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/${local.gateway_api_crd_version}/config/crd/experimental/gateway.networking.k8s.io_${each.value}.yaml"
 }
 
 resource "kubectl_manifest" "gateway_api_crd" {
-  depends_on = [data.talos_cluster_health.this]
-  for_each   = local.gateway_api_crds
-  yaml_body  = data.http.gateway_api_crd[each.value].response_body
+  depends_on        = [data.talos_cluster_health.this]
+  for_each          = local.gateway_api_crds
+  yaml_body         = data.http.gateway_api_crd[each.value].response_body
+  server_side_apply = true
 }
 
 resource "helm_release" "cilium" {
@@ -162,8 +163,23 @@ resource "kubectl_manifest" "certificate" {
   })
 }
 
+resource "kubectl_manifest" "gateway_class" {
+  depends_on = [helm_release.cilium]
+
+  yaml_body = yamlencode({
+    apiVersion = "gateway.networking.k8s.io/v1"
+    kind       = "GatewayClass"
+    metadata = {
+      name = "cilium"
+    }
+    spec = {
+      controllerName = "io.cilium/gateway-controller"
+    }
+  })
+}
+
 resource "kubectl_manifest" "gateway" {
-  depends_on = [kubectl_manifest.certificate]
+  depends_on = [kubectl_manifest.certificate, kubectl_manifest.gateway_class]
 
   yaml_body = yamlencode({
     apiVersion = "gateway.networking.k8s.io/v1"

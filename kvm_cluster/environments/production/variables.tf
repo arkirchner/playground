@@ -48,7 +48,8 @@ variable "admin_username" {
 }
 
 variable "admin_password" {
-  description = "Password for admin basic auth (SHA1 base64 hash for htpasswd)"
+  description = "Plaintext password for admin basic auth"
   type        = string
   sensitive   = true
 }
+

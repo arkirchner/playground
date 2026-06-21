@@ -35,136 +35,8 @@ resource "helm_release" "longhorn" {
   }
 }
 
-resource "kubernetes_config_map" "longhorn_auth_proxy" {
-  depends_on = [helm_release.longhorn]
-
-  metadata {
-    name      = "longhorn-auth-proxy"
-    namespace = kubernetes_namespace.longhorn.metadata[0].name
-  }
-
-  data = {
-    "nginx.conf" = <<-EOF
-      pid /tmp/nginx.pid;
-      events {}
-      http {
-        server {
-          listen 8080;
-
-          location / {
-            auth_basic "Longhorn";
-            auth_basic_user_file /etc/nginx/.htpasswd;
-            proxy_pass http://longhorn-frontend:80;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-          }
-        }
-      }
-    EOF
-
-    ".htpasswd" = "${var.admin_username}:{SHA}${var.admin_password}"
-  }
-}
-
-resource "kubernetes_deployment" "longhorn_auth_proxy" {
-  depends_on = [kubernetes_config_map.longhorn_auth_proxy]
-
-  metadata {
-    name      = "longhorn-auth-proxy"
-    namespace = kubernetes_namespace.longhorn.metadata[0].name
-    labels = {
-      app = "longhorn-auth-proxy"
-    }
-  }
-
-  spec {
-    replicas = 1
-
-    selector {
-      match_labels = {
-        app = "longhorn-auth-proxy"
-      }
-    }
-
-    template {
-      metadata {
-        labels = {
-          app = "longhorn-auth-proxy"
-        }
-      }
-
-      spec {
-        security_context {
-          run_as_non_root = true
-          seccomp_profile {
-            type = "RuntimeDefault"
-          }
-        }
-
-        container {
-          name  = "nginx"
-          image = "nginxinc/nginx-unprivileged:alpine"
-
-          port {
-            container_port = 8080
-          }
-
-          security_context {
-            allow_privilege_escalation = false
-            run_as_non_root            = true
-            capabilities {
-              drop = ["ALL"]
-            }
-          }
-
-          volume_mount {
-            name       = "config"
-            mount_path = "/etc/nginx/nginx.conf"
-            sub_path   = "nginx.conf"
-          }
-
-          volume_mount {
-            name       = "config"
-            mount_path = "/etc/nginx/.htpasswd"
-            sub_path   = ".htpasswd"
-          }
-        }
-
-        volume {
-          name = "config"
-          config_map {
-            name = kubernetes_config_map.longhorn_auth_proxy.metadata[0].name
-          }
-        }
-      }
-    }
-  }
-}
-
-resource "kubernetes_service" "longhorn_auth_proxy" {
-  depends_on = [kubernetes_deployment.longhorn_auth_proxy]
-
-  metadata {
-    name      = "longhorn-auth-proxy"
-    namespace = kubernetes_namespace.longhorn.metadata[0].name
-  }
-
-  spec {
-    selector = {
-      app = "longhorn-auth-proxy"
-    }
-
-    port {
-      port        = 80
-      target_port = 8080
-    }
-  }
-}
-
 resource "kubectl_manifest" "longhorn_httproute" {
-  depends_on = [kubernetes_service.longhorn_auth_proxy, kubectl_manifest.gateway]
+  depends_on = [helm_release.longhorn, kubectl_manifest.oauth2_proxy_reference_grant, kubernetes_deployment.auth_proxy]
 
   yaml_body = yamlencode({
     apiVersion = "gateway.networking.k8s.io/v1"
@@ -193,12 +65,62 @@ resource "kubectl_manifest" "longhorn_httproute" {
               }
             }
           ]
+          filters = [
+            {
+              type = "ExternalAuth"
+              externalAuth = {
+                protocol = "HTTP"
+                backendRef = {
+                  name      = "auth-proxy"
+                  namespace = "auth"
+                  port      = 4181
+                }
+                http = {
+                  allowedHeaders = [
+                    "authorization",
+                  ]
+                  allowedResponseHeaders = [
+                    "no-headers-allowed",
+                  ]
+                }
+              }
+            }
+          ]
           backendRefs = [
             {
-              name = kubernetes_service.longhorn_auth_proxy.metadata[0].name
+              name = "longhorn-frontend"
               port = 80
             }
           ]
+        }
+      ]
+    }
+  })
+}
+
+resource "kubectl_manifest" "oauth2_proxy_reference_grant" {
+  depends_on = [kubernetes_namespace.auth]
+
+  yaml_body = yamlencode({
+    apiVersion = "gateway.networking.k8s.io/v1beta1"
+    kind       = "ReferenceGrant"
+    metadata = {
+      name      = "allow-longhorn-to-auth-proxy"
+      namespace = "auth"
+    }
+    spec = {
+      from = [
+        {
+          group     = "gateway.networking.k8s.io"
+          kind      = "HTTPRoute"
+          namespace = "longhorn-system"
+        }
+      ]
+      to = [
+        {
+          group = ""
+          kind  = "Service"
+          name  = "auth-proxy"
         }
       ]
     }
