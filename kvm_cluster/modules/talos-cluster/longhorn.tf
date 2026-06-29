@@ -73,7 +73,7 @@ resource "kubectl_manifest" "longhorn_httproute" {
                 backendRef = {
                   name      = "auth-proxy"
                   namespace = "auth"
-                  port      = 4181
+                  port      = 80
                 }
                 http = {
                   allowedHeaders = [

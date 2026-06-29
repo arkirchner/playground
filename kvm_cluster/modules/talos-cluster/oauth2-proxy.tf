@@ -37,7 +37,7 @@ resource "kubernetes_config_map" "auth_proxy" {
 
       http {
           server {
-              listen 4181;
+              listen 80;
 
               location / {
                   auth_basic           "Restricted";
@@ -84,7 +84,7 @@ resource "kubernetes_deployment" "auth_proxy" {
           image = "nginx:alpine"
 
           port {
-            container_port = 4181
+            container_port = 80
           }
 
           volume_mount {
@@ -102,14 +102,14 @@ resource "kubernetes_deployment" "auth_proxy" {
           liveness_probe {
             http_get {
               path = "/healthz"
-              port = 4181
+              port = 80
             }
           }
 
           readiness_probe {
             http_get {
               path = "/healthz"
-              port = 4181
+              port = 80
             }
           }
         }
@@ -148,8 +148,8 @@ resource "kubernetes_service" "auth_proxy" {
     }
 
     port {
-      port        = 4181
-      target_port = 4181
+      port        = 80
+      target_port = 80
     }
   }
 }
