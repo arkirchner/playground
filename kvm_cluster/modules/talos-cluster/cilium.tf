@@ -163,23 +163,8 @@ resource "kubectl_manifest" "certificate" {
   })
 }
 
-resource "kubectl_manifest" "gateway_class" {
-  depends_on = [helm_release.cilium]
-
-  yaml_body = yamlencode({
-    apiVersion = "gateway.networking.k8s.io/v1"
-    kind       = "GatewayClass"
-    metadata = {
-      name = "cilium"
-    }
-    spec = {
-      controllerName = "io.cilium/gateway-controller"
-    }
-  })
-}
-
 resource "kubectl_manifest" "gateway" {
-  depends_on = [kubectl_manifest.certificate, kubectl_manifest.gateway_class]
+  depends_on = [kubectl_manifest.certificate]
 
   yaml_body = yamlencode({
     apiVersion = "gateway.networking.k8s.io/v1"
