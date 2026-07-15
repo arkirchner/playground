@@ -1,0 +1,11 @@
+service:
+  type: NodePort
+  nodePort: 30080
+
+nodeSelector:
+  kubernetes.io/hostname: salando-control-plane
+
+tolerations:
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
+    effect: NoSchedule

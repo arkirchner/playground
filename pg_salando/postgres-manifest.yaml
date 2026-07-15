@@ -1,0 +1,33 @@
+apiVersion: "acid.zalan.do/v1"
+kind: postgresql
+metadata:
+  name: acid-minimal-cluster
+spec:
+  teamId: "acid"
+  volume:
+    size: 1Gi
+  numberOfInstances: 1
+  enableLogicalBackup: true
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - salando-control-plane
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
+  users:
+    zalando:  # database owner
+    - superuser
+    - createdb
+    foo_user: []  # role for application foo
+  databases:
+    foo: zalando  # dbname: owner
+  preparedDatabases:
+    bar: {}
+  postgresql:
+    version: "16"
