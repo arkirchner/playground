@@ -64,6 +64,8 @@ psql -U postgres
 # Backup storage
 
 - MinIO runs inside the cluster as an S3-compatible endpoint at `http://minio.default.svc.cluster.local:9000`.
+- From the host, the MinIO S3 API is reachable at `http://localhost:9000` (NodePort 30900 via a kind port mapping; credentials `minioadmin` / `minioadmin123`).
+- The MinIO Console (web UI to manage buckets, objects and users) is available at `http://localhost:9001` (NodePort 30901).
 - WAL archiving and physical base backups are configured through `postgres-operator-values.yaml`.
 - Logical backups are enabled per cluster in `postgres-manifest.yaml` and stored in the same `postgres-backups` bucket.
 - The installed operator chart version (`1.15.1`) does not accept `enableMasterNodePort` / `masterNodePort` in the `postgresql` manifest, so DB access stays on `kubectl port-forward` in this repo.
