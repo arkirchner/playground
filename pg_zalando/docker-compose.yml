@@ -1,0 +1,27 @@
+---
+# ### DEVELOPMENT ###
+#
+# Runs all needed external services via docker on locally bound ports.
+#
+
+services:
+  postgres:
+    build: .
+    restart: always
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - ./pgbackrest.conf:/etc/pgbackrest.conf
+    ports:
+      - 127.0.0.1:5436:5432
+    environment:
+      POSTGRES_USER: $USER
+      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_INITDB_ARGS: --locale=C.UTF-8 --encoding=UTF8
+    healthcheck:
+      test: pg_isready
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+volumes:
+  postgres:

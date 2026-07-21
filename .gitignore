@@ -8,3 +8,4 @@ kvm_cluster/environments/*/.libvirt-pool/
 kvm_cluster/environments/*/crash.log
 kvm_cluster/modules/*/.terraform/
 kvm_cluster/modules/*/.terraform.lock.hcl
+pg_zalando/pgbackrest.conf

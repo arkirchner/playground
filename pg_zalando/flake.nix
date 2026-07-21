@@ -16,6 +16,7 @@
           packages = with pkgs; [
             kind
             kubernetes-helm
+            pgbackrest
           ];
         };
       });
