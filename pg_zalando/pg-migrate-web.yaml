@@ -38,22 +38,44 @@ spec:
               set -euo pipefail
 
               export PGPASSWORD="$SRC_PASSWORD"
-              echo "=== pg_dump from external-db ==="
-              time pg_dump -h external-db -p 5432 -U "$SRC_USER" -d web \
-                --no-owner --no-privileges \
-                -Fd -j 4 -Z 3 -f /dump/web
 
-              echo "=== filtering EXTENSION entries from TOC (pre-created on target) ==="
-              pg_restore -l /dump/web | grep -vE ' EXTENSION - | COMMENT - EXTENSION ' > /dump/toc.list
+              echo "=== pg_dump schema from external-db and apply on target DB ==="
 
-              export PGPASSWORD="$DST_PASSWORD"
-              export PGSSLMODE=require
-              echo "=== pg_restore to acid-web ==="
-              time pg_restore -h acid-web -p 5432 -U web -d web \
-                --no-owner --no-privileges --clean --if-exists \
-                -j 4 -L /dump/toc.list /dump/web
+              PGPASSWORD="$SRC_PASSWORD" pg_dump \
+                -h external-db \
+                -U "$SRC_USER" \
+                -d web \
+                -p 5432 \
+                --schema-only \
+                --format=plain \
+                --no-owner \
+                --no-privileges \
+                --no-comments \
+              | PGPASSWORD="$DST_PASSWORD" PGSSLMODE=require psql \
+                -U web \
+                -h acid-web \
+                -d web \
+                -p 5432
 
-              echo "=== migration finished ==="
+              echo "=== schema migration finished ===\n\n"
+              echo "=== pg_dump data from external-db and apply on target DB ==="
+
+              PGPASSWORD="$SRC_PASSWORD" pg_dump \
+                -h external-db \
+                -U "$SRC_USER" \
+                -d web \
+                -p 5432 \
+                --data-only \
+                --format=c \
+              | PGPASSWORD="$DST_PASSWORD" PGSSLMODE=require pg_restore \
+                -U web \
+                -h acid-web \
+                -d web \
+                -p 5432 \
+                --format=c \
+                --verbose
+
+              echo "=== data migration finished ==="
           volumeMounts:
             - name: dump
               mountPath: /dump
