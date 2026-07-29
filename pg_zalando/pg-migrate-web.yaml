@@ -1,0 +1,62 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pg-migrate-web
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 86400
+  template:
+    spec:
+      restartPolicy: Never
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: migrate
+          image: postgres:16
+          env:
+            - name: SRC_USER
+              valueFrom:
+                secretKeyRef:
+                  name: external-db-credentials
+                  key: username
+            - name: SRC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: external-db-credentials
+                  key: password
+            - name: DST_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: web.acid-web.credentials.postgresql.acid.zalan.do
+                  key: password
+          command:
+            - bash
+            - -c
+            - |
+              set -euo pipefail
+
+              export PGPASSWORD="$SRC_PASSWORD"
+              echo "=== pg_dump from external-db ==="
+              time pg_dump -h external-db -p 5432 -U "$SRC_USER" -d web \
+                --no-owner --no-privileges \
+                -Fd -j 4 -Z 3 -f /dump/web
+
+              echo "=== filtering EXTENSION entries from TOC (pre-created on target) ==="
+              pg_restore -l /dump/web | grep -vE ' EXTENSION - | COMMENT - EXTENSION ' > /dump/toc.list
+
+              export PGPASSWORD="$DST_PASSWORD"
+              export PGSSLMODE=require
+              echo "=== pg_restore to acid-web ==="
+              time pg_restore -h acid-web -p 5432 -U web -d web \
+                --no-owner --no-privileges --clean --if-exists \
+                -j 4 -L /dump/toc.list /dump/web
+
+              echo "=== migration finished ==="
+          volumeMounts:
+            - name: dump
+              mountPath: /dump
+      volumes:
+        - name: dump
+          emptyDir: {}
