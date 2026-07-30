@@ -3,25 +3,37 @@ kind: postgresql
 metadata:
   name: acid-web
 spec:
+  resources:
+    requests:
+      cpu: "4"
+      memory: "6Gi"
   teamId: "acid"
   volume:
-    size: 1Gi
-  numberOfInstances: 1
-  nodeAffinity:
-    requiredDuringSchedulingIgnoredDuringExecution:
-      nodeSelectorTerms:
-        - matchExpressions:
-            - key: kubernetes.io/hostname
-              operator: In
-              values:
-                - salando-control-plane
-  tolerations:
-    - key: node-role.kubernetes.io/control-plane
-      operator: Exists
-      effect: NoSchedule
+    size: 200Gi
+  numberOfInstances: 2
   users:
     web: []
   databases:
     web: web
   postgresql:
     version: "16"
+    parameters:
+      max_connections: "100"
+      shared_buffers: 1536MB
+      effective_cache_size: 4608MB
+      maintenance_work_mem: 384MB
+      checkpoint_completion_target: "0.9"
+      wal_buffers: 16MB
+      default_statistics_target: "100"
+      random_page_cost: "1.1"
+      effective_io_concurrency: "300"
+      work_mem: 13610kB
+      huge_pages: "false"
+      jit: "false"
+      wal_compression: lz4
+      min_wal_size: 1GB
+      max_wal_size: 4GB
+      max_worker_processes: "4"
+      max_parallel_workers_per_gather: "2"
+      max_parallel_workers: "4"
+      max_parallel_maintenance_workers: "2"
