@@ -64,16 +64,22 @@ spec:
                 -h external-db \
                 -U "$SRC_USER" \
                 -d web \
+                -j 8 \
                 -p 5432 \
                 --data-only \
-                --format=c \
-              | PGPASSWORD="$DST_PASSWORD" PGSSLMODE=require pg_restore \
+                --format=d \
+                --verbose \
+                --file=/dump
+
+              PGPASSWORD="$DST_PASSWORD" PGSSLMODE=require pg_restore \
                 -U web \
                 -h acid-web \
                 -d web \
+                -j 8 \
                 -p 5432 \
-                --format=c \
-                --verbose
+                --format=d \
+                --verbose \
+                /dump
 
               echo "=== data migration finished ==="
           volumeMounts:

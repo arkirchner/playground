@@ -28,8 +28,9 @@ kubectl wait --for=condition=complete job/minio-create-bucket --timeout=180s
 
 helm repo add postgres-operator-charts https://opensource.zalando.com/postgres-operator/charts/postgres-operator
 helm repo add postgres-operator-ui-charts https://opensource.zalando.com/postgres-operator/charts/postgres-operator-ui
-helm install postgres-operator postgres-operator-charts/postgres-operator -f postgres-operator-values.yaml
-helm install postgres-operator-ui postgres-operator-ui-charts/postgres-operator-ui -f postgres-operator-ui-values.yaml
+helm repo update
+helm install postgres-operator postgres-operator-charts/postgres-operator --version 2.0.0 -f postgres-operator-values.yaml
+helm install postgres-operator-ui postgres-operator-ui-charts/postgres-operator-ui --version 2.0.1 -f postgres-operator-ui-values.yaml
 ```
 
 The Postgres operator UI is then available at `http://localhost:8080/`.

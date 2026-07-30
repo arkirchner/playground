@@ -13,6 +13,6 @@ metadata:
   name: external-db
 subsets:
 - addresses:
-  - ip: 10.224.199.24
+  - ip: 10.224.196.5
   ports:
   - port: 6432
