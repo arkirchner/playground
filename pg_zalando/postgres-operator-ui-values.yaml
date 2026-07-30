@@ -9,3 +9,28 @@ tolerations:
   - key: node-role.kubernetes.io/control-plane
     operator: Exists
     effect: NoSchedule
+
+# Extra UI ENVs for the local MinIO S3 snapshot view.
+# The secret is created by minio.yaml; the bucket/region match postgres-operator-values.yaml.
+extraEnvs:
+  - name: SPILO_S3_BACKUP_BUCKET
+    value: postgres-backups
+  - name: SPILO_S3_BACKUP_PREFIX
+    value: spilo/
+  - name: AWS_ACCESS_KEY_ID
+    valueFrom:
+      secretKeyRef:
+        name: local-s3-credentials
+        key: AWS_ACCESS_KEY_ID
+  - name: AWS_SECRET_ACCESS_KEY
+    valueFrom:
+      secretKeyRef:
+        name: local-s3-credentials
+        key: AWS_SECRET_ACCESS_KEY
+  - name: AWS_DEFAULT_REGION
+    value: us-east-1
+  - name: AWS_ENDPOINT
+    valueFrom:
+      secretKeyRef:
+        name: local-s3-credentials
+        key: AWS_ENDPOINT
