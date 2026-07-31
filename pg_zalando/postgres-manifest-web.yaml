@@ -1,23 +1,29 @@
 apiVersion: "acid.zalan.do/v1"
 kind: postgresql
 metadata:
-  name: acid-web
+  name: xikolo-db
 spec:
   resources:
     requests:
       cpu: "4"
       memory: "6Gi"
-  teamId: "acid"
+  teamId: "openHPI"
   volume:
     size: 200Gi
   numberOfInstances: 2
-  users:
-    web: []
-  databases:
-    web: web
+  preparedDatabases:
+    xikolo:
+      defaultUsers: true
+      extensions:
+        dblink: public
+        pgcrypto: public
+        unaccent: public
+        uuid-ossp: public
+        pg_trgm: public
+        hstore: public
   postgresql:
     version: "16"
-    parameters:
+    parameters: # generated with pgtune
       max_connections: "100"
       shared_buffers: 1536MB
       effective_cache_size: 4608MB

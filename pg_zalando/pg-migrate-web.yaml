@@ -29,7 +29,7 @@ spec:
             - name: DST_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: web.acid-web.credentials.postgresql.acid.zalan.do
+                  name: xikolo-owner-user.xikolo-db.credentials.postgresql.acid.zalan.do
                   key: password
           command:
             - bash
@@ -39,26 +39,7 @@ spec:
 
               export PGPASSWORD="$SRC_PASSWORD"
 
-              echo "=== pg_dump schema from external-db and apply on target DB ==="
-
-              PGPASSWORD="$SRC_PASSWORD" pg_dump \
-                -h external-db \
-                -U "$SRC_USER" \
-                -d web \
-                -p 5432 \
-                --schema-only \
-                --format=plain \
-                --no-owner \
-                --no-privileges \
-                --no-comments \
-              | PGPASSWORD="$DST_PASSWORD" PGSSLMODE=require psql \
-                -U web \
-                -h acid-web \
-                -d web \
-                -p 5432
-
-              echo "=== schema migration finished ===\n\n"
-              echo "=== pg_dump data from external-db and apply on target DB ==="
+              echo "=== pg_dump from external-db ==="
 
               PGPASSWORD="$SRC_PASSWORD" pg_dump \
                 -h external-db \
@@ -66,17 +47,24 @@ spec:
                 -d web \
                 -j 8 \
                 -p 5432 \
-                --data-only \
+                --no-owner \
+                --no-privileges \
+                --no-comments \
                 --format=d \
                 --verbose \
                 --file=/dump
 
+              echo "=== pg_restore to xikolo-db ==="
+
               PGPASSWORD="$DST_PASSWORD" PGSSLMODE=require pg_restore \
-                -U web \
-                -h acid-web \
-                -d web \
+                -U xikolo_owner_user \
+                -h xikolo-db \
+                -d xikolo \
                 -j 8 \
                 -p 5432 \
+                --no-owner \
+                --no-privileges \
+                --no-comments \
                 --format=d \
                 --verbose \
                 /dump
@@ -87,4 +75,5 @@ spec:
               mountPath: /dump
       volumes:
         - name: dump
-          emptyDir: {}
+          emptyDir:
+            sizeLimit: 150Gi
