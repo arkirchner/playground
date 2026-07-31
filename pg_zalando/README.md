@@ -16,6 +16,7 @@ kubectl cluster-info --context kind-salando
 
 ```
 kind delete cluster --name salando
+
 ```
 
 
@@ -24,11 +25,15 @@ kind delete cluster --name salando
 ```
 kubectl create namespace zalando-postgres-operator
 
-kubectl -n zalando-postgres-operator create secret generic s3-access \
-  --from-literal=AWS_ACCESS_KEY_ID='minioadmin' \
-  --from-literal=AWS_SECRET_ACCESS_KEY='minioadmin123' \
-  --from-literal=AWS_DEFAULT_REGION='us-east-1' \
-  --from-literal=AWS_ENDPOINT='http://minio.default.svc.cluster.local:9000'
+# The s3-access secret is required in two kinds of namespaces:
+# - zalando-postgres-operator: the operator UI reads it (secretKeyRef)
+# - every namespace where postgresql clusters are deployed: the operator reads
+#   pod_environment_secret / logical_backup_cronjob_environment_secret only
+#   from the cluster's own namespace. Clusters from this repo go to `default`.
+kubectl -n zalando-postgres-operator apply -f s3-access-secret.yaml
+kubectl -n default apply -f s3-access-secret.yaml
+# additional cluster namespaces: kubectl -n <ns> apply -f s3-access-secret.yaml
+# (or automate with a secret replicator, e.g. mittwald/kubernetes-replicator)
 
 kubectl apply -f minio.yaml
 kubectl wait -n zalando-postgres-operator --for=condition=available deployment/minio --timeout=180s
@@ -94,7 +99,7 @@ psql -U postgres
 
 # Backup storage
 
-- MinIO runs inside the cluster as an S3-compatible endpoint at `http://minio.default.svc.cluster.local:9000`.
+- MinIO runs inside the cluster as an S3-compatible endpoint at `http://minio.zalando-postgres-operator.svc.cluster.local:9000`.
 - From the host, the MinIO S3 API is reachable at `http://localhost:9000` (NodePort 30900 via a kind port mapping; credentials `minioadmin` / `minioadmin123`).
 - The MinIO Console (web UI to manage buckets, objects and users) is available at `http://localhost:9001` (NodePort 30901).
 - WAL archiving and physical base backups are configured through `postgres-operator-values.yaml`.

@@ -16,19 +16,34 @@ kubectl create namespace zalando-postgres-operator
 
 ## 2. Create the S3 credentials secret
 
-The operator mounts this secret into Postgres pods (`pod_environment_secret`)
-and into the logical-backup CronJobs; the operator UI also reads it for its S3
-snapshot view. The name must stay `local-s3-credentials` (referenced by both
-values files).
+The secret is needed in two kinds of namespaces:
+
+- `zalando-postgres-operator`: the operator UI reads it via `secretKeyRef`.
+- **Every** namespace where Postgres clusters are deployed: the operator reads
+  `pod_environment_secret` and `logical_backup_cronjob_environment_secret`
+  only from the cluster's own namespace (no cross-namespace support), and the
+  Spilo pods reference it via `secretKeyRef` as well.
+
+The name must match the references in both values files (`s3-access`). With
+many cluster namespaces, replicate automatically instead of copying by hand
+(e.g. with mittwald/kubernetes-replicator).
 
 ```bash
 kubectl -n zalando-postgres-operator create secret generic s3-access \
   --from-literal=AWS_ACCESS_KEY_ID='U0PV847GLDETGJ7H5HOG' \
   --from-literal=AWS_SECRET_ACCESS_KEY='foobarbaz' \
+  --from-literal=AWS_REGION='us-east-1' \
   --from-literal=AWS_DEFAULT_REGION='us-east-1' \
-  --from-literal=AWS_ENDPOINT='https://s3.openhpicloud.de' \
+  --from-literal=AWS_ENDPOINT='https://s3.openhpicloud.de'
 
+# repeat with the same literals for every namespace that hosts Postgres clusters:
+# kubectl -n <cluster-namespace> create secret generic s3-access ...
 ```
+
+If the S3 endpoint has no SSE/KMS support (plain Ceph RGW, MinIO), also add
+`--from-literal=WALG_DISABLE_S3_SSE='true'` - Spilo otherwise defaults
+`WALG_S3_SSE` to `AES256` and every WAL upload fails with
+`NotImplemented: Server side encryption specified but KMS is not configured`.
 
 ## 3. Chart values for provider and UI
 
@@ -49,7 +64,12 @@ configLogicalBackup:
   logical_backup_s3_bucket_prefix: logical
   logical_backup_s3_retention_time: 7 days
   logical_backup_s3_sse: ""
-  logical_backup_cronjob_environment_secret: s3-secret
+  # non-sensitive: the backup script only honors LOGICAL_BACKUP_S3_ENDPOINT /
+  # LOGICAL_BACKUP_S3_REGION, which the operator generates from this config
+  logical_backup_s3_endpoint: https://s3.openhpicloud.de
+  logical_backup_s3_region: us-east-1
+  # credentials: read from the s3-access secret in each cluster's namespace
+  logical_backup_cronjob_environment_secret: s3-access
 
 ```
 
@@ -87,7 +107,7 @@ extraEnvs:
 
 ```
 
-## 3. Deploy the charts
+## 4. Deploy the charts
 
 
 Add the helm Repositories:

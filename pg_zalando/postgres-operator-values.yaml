@@ -1,4 +1,6 @@
 configKubernetes:
+  # read from the namespace of each Postgres cluster -> the s3-access secret
+  # must exist in every namespace where clusters are deployed
   pod_environment_secret: s3-access
 
 configAwsOrGcp:
@@ -10,4 +12,9 @@ configLogicalBackup:
   logical_backup_s3_bucket_prefix: logical
   logical_backup_s3_retention_time: 7 days
   logical_backup_s3_sse: ""
+  # non-sensitive: dump.sh only honors LOGICAL_BACKUP_S3_ENDPOINT/_REGION,
+  # which the operator generates from this config (not from the secret)
+  logical_backup_s3_endpoint: http://minio.zalando-postgres-operator.svc.cluster.local:9000
+  logical_backup_s3_region: us-east-1
+  # credentials: read from the s3-access secret in each cluster's namespace
   logical_backup_cronjob_environment_secret: s3-access
