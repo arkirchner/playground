@@ -2,16 +2,6 @@ service:
   type: NodePort
   nodePort: 30080
 
-nodeSelector:
-  kubernetes.io/hostname: salando-control-plane
-
-tolerations:
-  - key: node-role.kubernetes.io/control-plane
-    operator: Exists
-    effect: NoSchedule
-
-# Extra UI ENVs for the local MinIO S3 snapshot view.
-# The secret is created by minio.yaml; the bucket/region match postgres-operator-values.yaml.
 extraEnvs:
   - name: SPILO_S3_BACKUP_BUCKET
     value: postgres-backups
@@ -20,17 +10,20 @@ extraEnvs:
   - name: AWS_ACCESS_KEY_ID
     valueFrom:
       secretKeyRef:
-        name: local-s3-credentials
+        name: s3-access
         key: AWS_ACCESS_KEY_ID
   - name: AWS_SECRET_ACCESS_KEY
     valueFrom:
       secretKeyRef:
-        name: local-s3-credentials
+        name: s3-access
         key: AWS_SECRET_ACCESS_KEY
   - name: AWS_DEFAULT_REGION
-    value: us-east-1
+    valueFrom:
+      secretKeyRef:
+        name: s3-access
+        key: AWS_DEFAULT_REGION
   - name: AWS_ENDPOINT
     valueFrom:
       secretKeyRef:
-        name: local-s3-credentials
+        name: s3-access
         key: AWS_ENDPOINT

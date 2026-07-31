@@ -22,15 +22,32 @@ kind delete cluster --name salando
 # Setup Postgres provider
 
 ```
+kubectl create namespace zalando-postgres-operator
+
+kubectl -n zalando-postgres-operator create secret generic s3-access \
+  --from-literal=AWS_ACCESS_KEY_ID='minioadmin' \
+  --from-literal=AWS_SECRET_ACCESS_KEY='minioadmin123' \
+  --from-literal=AWS_DEFAULT_REGION='us-east-1' \
+  --from-literal=AWS_ENDPOINT='http://minio.default.svc.cluster.local:9000'
+
 kubectl apply -f minio.yaml
-kubectl wait --for=condition=available deployment/minio --timeout=180s
-kubectl wait --for=condition=complete job/minio-create-bucket --timeout=180s
+kubectl wait -n zalando-postgres-operator --for=condition=available deployment/minio --timeout=180s
+kubectl wait -n zalando-postgres-operator --for=condition=complete job/minio-create-bucket --timeout=180s
 
 helm repo add postgres-operator-charts https://opensource.zalando.com/postgres-operator/charts/postgres-operator
 helm repo add postgres-operator-ui-charts https://opensource.zalando.com/postgres-operator/charts/postgres-operator-ui
 helm repo update
-helm install postgres-operator postgres-operator-charts/postgres-operator --version 2.0.0 -f postgres-operator-values.yaml
-helm install postgres-operator-ui postgres-operator-ui-charts/postgres-operator-ui --version 2.0.1 -f postgres-operator-ui-values.yaml
+
+helm install postgres-operator postgres-operator-charts/postgres-operator \
+  --version 2.0.0 \
+  --namespace zalando-postgres-operator \
+  -f postgres-operator-values.yaml
+
+helm install postgres-operator-ui postgres-operator-ui-charts/postgres-operator-ui \
+  --version 2.0.1 \
+  --namespace zalando-postgres-operator \
+  -f postgres-operator-ui-values.yaml
+
 ```
 
 The Postgres operator UI is then available at `http://localhost:8080/`.
